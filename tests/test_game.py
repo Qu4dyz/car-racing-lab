@@ -5,11 +5,7 @@ from unittest.mock import patch
 from src.game import Game
 from src.settings import *
 
-# Вказуємо Pygame використовувати віртуальний (невидимий) монітор для сервера
 os.environ["SDL_VIDEODRIVER"] = "dummy"
-
-# Ініціалізуємо дисплей до створення будь-яких об'єктів, 
-# щоб метод convert_alpha() працював без помилок
 pygame.init()
 pygame.display.set_mode((1, 1))
 
@@ -17,8 +13,12 @@ pygame.display.set_mode((1, 1))
 def basic_game():
     """Фікстура для підготовки базового стану гри перед кожним тестом."""
     game = Game(difficulty='easy', bg_color='gray')
-    game.new_game()
-    game.playing = False # Зупиняємо цикл, щоб тест не завис
+    
+    # Забороняємо грі заходити в нескінченний цикл (while) під час створення
+    with patch.object(Game, 'run'):
+        game.new_game()
+        
+    game.playing = False 
     yield game
 
 @pytest.mark.logic
@@ -38,8 +38,6 @@ def test_spawn_enemy(basic_game):
     """Тест спавну ворогів із застосуванням мокування (Mocking)."""
     initial_enemy_count = len(basic_game.enemies)
     
-    # Мокуємо генератор випадкових чисел, щоб він завжди повертав 0.0
-    # Це гарантує, що умова спавну (random.random() < spawn_chance) завжди виконається
     with patch('random.random', return_value=0.0):
         basic_game.update()
         
