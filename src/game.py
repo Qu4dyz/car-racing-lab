@@ -10,16 +10,24 @@ class Game:
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.running = True
+        self.font_name = pygame.font.match_font('arial') # Системний шрифт для тексту
 
-        # Установка складності (argparse)
         self.difficulty = difficulty
         if self.difficulty == 'hard':
             self.enemy_speed = SPEED_HARD
         else:
             self.enemy_speed = SPEED_EASY
 
+    def draw_text(self, text, size, color, x, y):
+        # Допоміжний метод для зручного малювання тексту
+        font = pygame.font.Font(self.font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)
+        self.screen.blit(text_surface, text_rect)
+
     def new_game(self):
-        # Запуск нової гри
+        self.score = 0 # Скидаємо рахунок при старті
         self.all_sprites = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
 
@@ -29,49 +37,62 @@ class Game:
         self.run()
 
     def run(self):
-        # Ігровий цикл (Game loop)
-        self.running = True
-        while self.running:
+        self.playing = True
+        while self.playing:
             self.clock.tick(FPS)
             self.events()
             self.update()
             self.draw()
+            
+        # Коли виходимо з циклу playing (програш), показуємо екран Game Over
+        if self.running:
+            self.show_go_screen()
 
     def update(self):
-        # Оновлення спрайтів
         self.all_sprites.update()
+        self.score += 1 # Підрахунок балів за час виживання
 
-        # Спавн ворогів (чим складшніше, тим частіше можна зробити, але поки - рандом)
-        if len(self.enemies) < 5: # Максимум 5 ворогів на екрані
-            if pygame.time.get_ticks() % 100 == 0: # Проста логіка спавна
+        if len(self.enemies) < 5: 
+            if pygame.time.get_ticks() % 100 == 0: 
                 self.spawn_enemy()
 
-        # Перевірка зіткнень (кінець гри)
         hits = pygame.sprite.spritecollide(self.player, self.enemies, False)
         if hits:
-            self.playing = False
-            self.running = False # Вихід з гри при зіткненні
+            self.playing = False # Зупиняємо ігровий цикл при зіткненні
 
     def spawn_enemy(self):
-        # Створюємо ворога з встановленною швидкістю
-        e= Enemy(self.enemy_speed)
+        e = Enemy(self.enemy_speed)
         self.all_sprites.add(e)
         self.enemies.add(e)
 
     def events(self):
-        # Обробка ввода
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                if self.playing:
-                    self.playing = False
+                self.playing = False
                 self.running = False
 
     def draw(self):
-        # Відрісовка
-        self.screen.fill(GRAY) # Фон дороги
+        self.screen.fill(GRAY)
         self.all_sprites.draw(self.screen)
+        # Малюємо поточний рахунок зверху по центру
+        self.draw_text(str(self.score), 22, WHITE, SCREEN_WIDTH / 2, 15) 
         pygame.display.flip()
 
     def show_go_screen(self):
-        # гейм овер
-        pass
+        self.screen.fill(BLACK)
+        self.draw_text("GAME OVER", 64, RED, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4)
+        self.draw_text(f"Твій рахунок: {self.score}", 22, WHITE, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.draw_text("Натисни будь-яку клавішу для рестарту", 18, WHITE, SCREEN_WIDTH / 2, SCREEN_HEIGHT * 3 / 4)
+        pygame.display.flip()
+        self.wait_for_key()
+
+    def wait_for_key(self):
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    self.running = False
+                if event.type == pygame.KEYUP:
+                    waiting = False
