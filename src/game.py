@@ -1,10 +1,11 @@
 import pygame
 import sys
+import random
 from src.settings import *
 from src.entities import Player, Enemy
 
 class Game:
-    def __init__(self, difficulty='easy'):
+    def __init__(self, difficulty='easy', bg_color='gray'):
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption(TITLE)
@@ -15,8 +16,20 @@ class Game:
         self.difficulty = difficulty
         if self.difficulty == 'hard':
             self.enemy_speed = SPEED_HARD
+            self.max_enemies = 12       # На харді буде цілий затор
+            self.spawn_chance = 0.08    # 8% шанс появи машини КОЖЕН кадр (дуже щільно)
         else:
             self.enemy_speed = SPEED_EASY
+            self.max_enemies = 5
+            self.spawn_chance = 0.02    # Рідкий спавн для легкої гри
+
+        # Зберігаємо вибраний колір фону
+        if bg_color == 'black':
+            self.bg_color = BLACK
+        elif bg_color == 'white':
+            self.bg_color = WHITE
+        else:
+            self.bg_color = GRAY
 
     def draw_text(self, text, size, color, x, y):
         font = pygame.font.Font(self.font_name, size)
@@ -50,8 +63,9 @@ class Game:
         self.all_sprites.update()
         self.score += 1
 
-        if len(self.enemies) < 5: 
-            if pygame.time.get_ticks() % 100 == 0: 
+        # Спавн ворогів залежно від складності
+        if len(self.enemies) < self.max_enemies: 
+            if random.random() < self.spawn_chance: 
                 self.spawn_enemy()
 
         hits = pygame.sprite.spritecollide(self.player, self.enemies, False)
@@ -70,9 +84,13 @@ class Game:
                 self.running = False
 
     def draw(self):
-        self.screen.fill(GRAY)
+        self.screen.fill(self.bg_color) 
         self.all_sprites.draw(self.screen)
-        self.draw_text(str(self.score), 22, WHITE, SCREEN_WIDTH / 2, 15) 
+        
+        # Якщо фон білий - малюємо чорний текст, інакше - білий
+        text_color = BLACK if self.bg_color == WHITE else WHITE
+        self.draw_text(str(self.score), 22, text_color, SCREEN_WIDTH / 2, 15) 
+        
         pygame.display.flip()
 
     def show_go_screen(self):
