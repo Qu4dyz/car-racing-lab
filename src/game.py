@@ -10,7 +10,7 @@ class Game:
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.running = True
-        self.font_name = pygame.font.match_font('arial') # Системний шрифт для тексту
+        self.font_name = pygame.font.match_font('arial')
 
         self.difficulty = difficulty
         if self.difficulty == 'hard':
@@ -19,7 +19,6 @@ class Game:
             self.enemy_speed = SPEED_EASY
 
     def draw_text(self, text, size, color, x, y):
-        # Допоміжний метод для зручного малювання тексту
         font = pygame.font.Font(self.font_name, size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
@@ -27,7 +26,7 @@ class Game:
         self.screen.blit(text_surface, text_rect)
 
     def new_game(self):
-        self.score = 0 # Скидаємо рахунок при старті
+        self.score = 0
         self.all_sprites = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
 
@@ -44,13 +43,12 @@ class Game:
             self.update()
             self.draw()
             
-        # Коли виходимо з циклу playing (програш), показуємо екран Game Over
         if self.running:
             self.show_go_screen()
 
     def update(self):
         self.all_sprites.update()
-        self.score += 1 # Підрахунок балів за час виживання
+        self.score += 1
 
         if len(self.enemies) < 5: 
             if pygame.time.get_ticks() % 100 == 0: 
@@ -58,7 +56,7 @@ class Game:
 
         hits = pygame.sprite.spritecollide(self.player, self.enemies, False)
         if hits:
-            self.playing = False # Зупиняємо ігровий цикл при зіткненні
+            self.playing = False
 
     def spawn_enemy(self):
         e = Enemy(self.enemy_speed)
@@ -74,7 +72,6 @@ class Game:
     def draw(self):
         self.screen.fill(GRAY)
         self.all_sprites.draw(self.screen)
-        # Малюємо поточний рахунок зверху по центру
         self.draw_text(str(self.score), 22, WHITE, SCREEN_WIDTH / 2, 15) 
         pygame.display.flip()
 
@@ -86,13 +83,9 @@ class Game:
         pygame.display.flip()
         self.wait_for_key()
 
-def wait_for_key(self):
-        # 1. Даємо півсекунди затримки, щоб гравець усвідомив зіткнення
+    def wait_for_key(self):
         pygame.time.wait(500) 
-        
-        # 2. Очищаємо чергу від старих подій (відпускання стрілочок тощо)
         pygame.event.clear() 
-        
         waiting = True
         while waiting:
             self.clock.tick(FPS)
@@ -100,6 +93,5 @@ def wait_for_key(self):
                 if event.type == pygame.QUIT:
                     waiting = False
                     self.running = False
-                # 3. Реагуємо ТІЛЬКИ на нове натискання клавіші
                 if event.type == pygame.KEYDOWN:
                     waiting = False
