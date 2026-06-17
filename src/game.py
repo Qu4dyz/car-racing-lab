@@ -86,7 +86,13 @@ class Game:
         pygame.display.flip()
         self.wait_for_key()
 
-    def wait_for_key(self):
+def wait_for_key(self):
+        # 1. Даємо півсекунди затримки, щоб гравець усвідомив зіткнення
+        pygame.time.wait(500) 
+        
+        # 2. Очищаємо чергу від старих подій (відпускання стрілочок тощо)
+        pygame.event.clear() 
+        
         waiting = True
         while waiting:
             self.clock.tick(FPS)
@@ -94,5 +100,6 @@ class Game:
                 if event.type == pygame.QUIT:
                     waiting = False
                     self.running = False
-                if event.type == pygame.KEYUP:
+                # 3. Реагуємо ТІЛЬКИ на нове натискання клавіші
+                if event.type == pygame.KEYDOWN:
                     waiting = False
