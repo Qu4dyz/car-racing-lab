@@ -2,7 +2,6 @@ import pygame
 import random
 from src.settings import *
 
-from SoloProjectCICD.src.settings import PLAYER_START_X, SCREEN_WIDTH
 
 
 class Player(pygame.sprite.Sprite):
